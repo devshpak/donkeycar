@@ -21,14 +21,23 @@ class AMSL293D:
 
         self.throttleL = 0
         self.throttleR = 0
-        self.leftMotors  = ([amspi.DC_Motor_1, amspi.DC_Motor_3])
-        self.rightMotors = ([amspi.DC_Motor_2, amspi.DC_Motor_4])
 
-    def set_pulse(self, pulse):
-        try:
-            self.pwm.set_pwm(self.channel, 0, pulse)
-        except OSError as err:
-            print("Unexpected issue setting PWM (check wires to motor board): {0}".format(err))
+    def runLeftMotors(throttle):
+        self.amspi.run_dc_motors(dc_motors = list(self.amspi.DC_Motor_1, self.amspi.DC_Motor_2),
+                                 speed = self.convert(abs(throttle)),
+                                 clockwise = self.throttle > 0)
+
+    def runRightMotors(throttle):
+        self.amspi.run_dc_motors(dc_motors = self.amspi.DC_Motor_3,
+                                 speed = self.convert(abs(throttle)),
+                                 clockwise = self.throttle > 0)
+        self.amspi.run_dc_motors(dc_motors = self.amspi.DC_Motor_4,
+                                 speed = self.convert(abs(throttle)),
+                                 clockwise = not(self.throttle > 0))
+
+    def stop():
+        self.ampi.stop_dc_motors(self.amspi.DC_Motor_1, self.amspi.DC_Motor_2,
+            self.amspi.DC_Motor_3, self.amspi.DC_Motor_4)
 
     def run(self, steering, throttle):
         '''
@@ -41,6 +50,10 @@ class AMSL293D:
 
         if steering > 1 or steering < -1:
             raise ValueError( "Steering must be between 1 and -1")
+
+        if (abs(throttle) < 0.05):
+            self.stop()
+            return
 
         if ( steering > 0 and throttle > 0 ):       # Quadrant 1
             self.throttleL = throttle
@@ -58,12 +71,9 @@ class AMSL293D:
             self.throttleL = throttle - steering
             self.throttleR = throttle
 
-        self.amspi.run_dc_motors(dc_motors = self.leftMotors,
-                            speed = self.convert(abs(self.throttleL)),
-                            clockwise = self.throttleL > 0)
-        self.amspi.run_dc_motors(dc_motors = self.rightMotors,
-                            speed = self.convert(abs(self.throttleR)),
-                            clockwise = self.throttleR > 0)
+        self.runLeftMotors(self.throttleL)
+        self.runrRghtMotors(self.throttleR)
+
 
     def convert(self, value):
         return int(dk.util.data.map_range(abs(value), 0, 1, 0, 100))
