@@ -7,6 +7,66 @@ are wrapped in a mixer class before being used in the drive loop.
 import time
 import donkeycar as dk
 
+class AMSL293D:
+    """
+    L293D controler or "Arduino Motor Shield L293D from Raspberry Pi (using RPi.GPIO)".
+    """
+    def __init__(self):
+        import AMSpi
+
+        amspi = AMSpi()
+        amspi.set_74HC595_pins(21, 20, 16)
+        amspi.set_L293D_pins(5, 6, 13, 19)
+        self.amspi = amspi
+
+        self.throttleL = 0
+        self.throttleR = 0
+        self.leftMotors  = ([amspi.DC_Motor_1, amspi.DC_Motor_3])
+        self.rightMotors = ([amspi.DC_Motor_2, amspi.DC_Motor_4])
+
+    def set_pulse(self, pulse):
+        try:
+            self.pwm.set_pwm(self.channel, 0, pulse)
+        except OSError as err:
+            print("Unexpected issue setting PWM (check wires to motor board): {0}".format(err))
+
+    def run(self, steering, throttle):
+        '''
+        Update the speed of the motor where 1 is full forward and
+        -1 is full backwards.
+        '''
+
+        if throttle > 1 or throttle < -1:
+            raise ValueError( "Speed must be between 1(forward) and -1(reverse)")
+
+        if steering > 1 or steering < -1:
+            raise ValueError( "Steering must be between 1 and -1")
+
+        if ( steering > 0 and throttle > 0 ):       # Quadrant 1
+            self.throttleL = throttle
+            self.throttleR = throttle - steering
+
+        elif ( steering < 0 and throttle > 0 ):     # Quadrant 2
+            self.throttleL = throttle + steering
+            self.throttleR = throttle
+
+        elif ( steering > 0 and throttle < 0 ):     # Quadrant 4
+            self.throttleL = throttle
+            self.throttleR = throttle + steering
+
+        elif ( steering < 0 and throttle < 0 ):     # Quadrant 3
+            self.throttleL = throttle - steering
+            self.throttleR = throttle
+
+        amspi.run_dc_motors(dc_motors = self.leftMotors,
+                            speed = self.convert(abs(throttleL)),
+                            clockwise = throttleL > 0)
+        amspi.run_dc_motors(dc_motors = self.rightMotors,
+                            speed = self.convert(abs(throttleR)),
+                            clockwise = throttleR > 0)
+
+    def convert(self, value):
+        return int(utils.map_range(abs(value), 0, 1, 0, 100))
 
 class PCA9685:
     """
