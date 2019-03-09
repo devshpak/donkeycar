@@ -19,7 +19,7 @@ import donkeycar as dk
 from donkeycar.parts.camera import PiCamera
 from donkeycar.parts.transform import Lambda
 from donkeycar.parts.keras import KerasLinear
-import AMSpi
+from AMSpi import AMSpi
 from donkeycar.parts.actuator import AMSL293D
 from donkeycar.parts.datastore import TubGroup, TubWriter
 from donkeycar.parts.web_controller import LocalWebController

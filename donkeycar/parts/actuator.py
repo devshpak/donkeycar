@@ -12,7 +12,7 @@ class AMSL293D:
     L293D controler or "Arduino Motor Shield L293D from Raspberry Pi (using RPi.GPIO)".
     """
     def __init__(self):
-        import AMSpi
+        from AMSpi import AMSpi
 
         amspi = AMSpi()
         amspi.set_74HC595_pins(21, 20, 16)
