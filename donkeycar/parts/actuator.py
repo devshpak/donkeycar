@@ -59,11 +59,11 @@ class AMSL293D:
             self.throttleR = throttle
 
         self.amspi.run_dc_motors(dc_motors = self.leftMotors,
-                            speed = self.convert(abs(throttleL)),
-                            clockwise = throttleL > 0)
+                            speed = self.convert(abs(self.throttleL)),
+                            clockwise = self.throttleL > 0)
         self.amspi.run_dc_motors(dc_motors = self.rightMotors,
-                            speed = self.convert(abs(throttleR)),
-                            clockwise = throttleR > 0)
+                            speed = self.convert(abs(self.throttleR)),
+                            clockwise = self.throttleR > 0)
 
     def convert(self, value):
         return int(utils.map_range(abs(value), 0, 1, 0, 100))
