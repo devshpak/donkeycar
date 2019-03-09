@@ -22,22 +22,18 @@ class AMSL293D:
         self.throttleL = 0
         self.throttleR = 0
 
-    def runLeftMotors(throttle):
-        self.amspi.run_dc_motors(dc_motors = list(self.amspi.DC_Motor_1, self.amspi.DC_Motor_2),
+    def runLeftMotors(self, throttle):
+        self.amspi.run_dc_motors(dc_motors = [self.amspi.DC_Motor_1, self.amspi.DC_Motor_2],
                                  speed = self.convert(abs(throttle)),
-                                 clockwise = self.throttle > 0)
+                                 clockwise = throttle > 0)
 
-    def runRightMotors(throttle):
-        self.amspi.run_dc_motors(dc_motors = self.amspi.DC_Motor_3,
+    def runRightMotors(self, throttle):
+        self.amspi.run_dc_motor(dc_motor = self.amspi.DC_Motor_3,
                                  speed = self.convert(abs(throttle)),
-                                 clockwise = self.throttle > 0)
-        self.amspi.run_dc_motors(dc_motors = self.amspi.DC_Motor_4,
+                                 clockwise = throttle > 0)
+        self.amspi.run_dc_motor(dc_motor = self.amspi.DC_Motor_4,
                                  speed = self.convert(abs(throttle)),
-                                 clockwise = not(self.throttle > 0))
-
-    def stop():
-        self.ampi.stop_dc_motors(self.amspi.DC_Motor_1, self.amspi.DC_Motor_2,
-            self.amspi.DC_Motor_3, self.amspi.DC_Motor_4)
+                                 clockwise = not(throttle > 0))
 
     def run(self, steering, throttle):
         '''
@@ -50,10 +46,6 @@ class AMSL293D:
 
         if steering > 1 or steering < -1:
             raise ValueError( "Steering must be between 1 and -1")
-
-        if (abs(throttle) < 0.05):
-            self.stop()
-            return
 
         if ( steering > 0 and throttle > 0 ):       # Quadrant 1
             self.throttleL = throttle
@@ -72,8 +64,7 @@ class AMSL293D:
             self.throttleR = throttle
 
         self.runLeftMotors(self.throttleL)
-        self.runrRghtMotors(self.throttleR)
-
+        self.runRightMotors(self.throttleR)
 
     def convert(self, value):
         return int(dk.util.data.map_range(abs(value), 0, 1, 0, 100))
