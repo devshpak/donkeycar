@@ -66,7 +66,7 @@ class AMSL293D:
                             clockwise = self.throttleR > 0)
 
     def convert(self, value):
-        return int(utils.map_range(abs(value), 0, 1, 0, 100))
+        return int(dk.util.data.map_range(abs(value), 0, 1, 0, 100))
 
 class PCA9685:
     """
