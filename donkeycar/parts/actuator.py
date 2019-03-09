@@ -12,7 +12,7 @@ class AMSL293D:
     L293D controler or "Arduino Motor Shield L293D from Raspberry Pi (using RPi.GPIO)".
     """
     def __init__(self):
-        from AMSpi import AMSpi
+        from AMSpi.AMSpi import AMSpi
 
         amspi = AMSpi()
         amspi.set_74HC595_pins(21, 20, 16)
@@ -58,10 +58,10 @@ class AMSL293D:
             self.throttleL = throttle - steering
             self.throttleR = throttle
 
-        amspi.run_dc_motors(dc_motors = self.leftMotors,
+        self.amspi.run_dc_motors(dc_motors = self.leftMotors,
                             speed = self.convert(abs(throttleL)),
                             clockwise = throttleL > 0)
-        amspi.run_dc_motors(dc_motors = self.rightMotors,
+        self.amspi.run_dc_motors(dc_motors = self.rightMotors,
                             speed = self.convert(abs(throttleR)),
                             clockwise = throttleR > 0)
 
